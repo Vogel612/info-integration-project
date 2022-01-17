@@ -1,0 +1,2 @@
+# bashscripts must end with lf to ensure shebangs are read correctly
+*.sh    eol=lf
