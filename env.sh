@@ -21,6 +21,13 @@ docker run -d --rm \
     -v "$(pwd)"/datadir:/var/lib/postgresql/data \
     postgres
 
+if [[ $? != 0 ]]
+then
+    exit_code = $?
+    echo "Could not run docker."
+    exit exit_code
+fi
+
 if [[ $# = 4 ]]
 then
     echo "Creating database integrated_system and defining schemata 'sources' and 'result'"
