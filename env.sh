@@ -23,13 +23,15 @@ docker run -d --rm \
 
 if [[ $? != 0 ]]
 then
-    exit_code = $?
+    exit_code=$?
     echo "Could not run docker."
-    exit exit_code
+    exit $exit_code
 fi
 
 if [[ $# = 4 ]]
 then
+    echo "Waiting for the docker container to finish starting..."
+    sleep 10s
     echo "Creating database integrated_system and defining schemata 'sources' and 'result'"
     PGPASSWORD=$password psql -h 127.0.0.1 -U postgres -c "CREATE DATABASE integrated_system OWNER 'postgres' LOCALE 'en_US.utf8';"
     PGPASSWORD=$password psql -h 127.0.0.1 -U postgres integrated_system < define_sources.sql;
@@ -43,7 +45,7 @@ then
         PGPASSWORD=$password psql -h 127.0.0.1 -U postgres integrated_system -c "COPY sources.mal_anime(anime_id, name, genre, type, episodes, rating, members) FROM STDIN CSV HEADER" < $2
         echo "Importing $3 into sources.anime_data"
         PGPASSWORD=$password psql -h 127.0.0.1 -U postgres integrated_system -c "COPY sources.anime_data(title, type, episodes, status, start_airing, end_airing, release_season, broadcast_slot, producers, licensors, studios, sources, genres, duration, esrb_rating, score, scored_by, members, favorites, description) FROM STDIN CSV HEADER" < $3
-        echo "Importing $4 into sources.recommendations.db"
+        echo "Importing $4 into sources.recommendations_db"
         PGPASSWORD=$password psql -h 127.0.0.1 -U postgres integrated_system -c "COPY sources.recommendations_db(anime_id, title, genre, synopsis, type, producer, studio, rating, scored_by, popularity, members, episodes, source, aired, link) FROM STDIN CSV HEADER" < $4
     else
         echo "Not all files existed and were readable. Aborting data import."

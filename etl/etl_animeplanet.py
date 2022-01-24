@@ -52,7 +52,7 @@ def do_migration():
                     number_of_episodes, media_type, score, scored_by, start_year, finish_year, season_of_release) VALUES (
                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id""",
                         (row["title"], row["description"], row["duration"], row["eps"], row["media_type"],
-                        row["rating"] * 2, row["votes"], row["start_yr"], row["finish_yr"], row["release_season"]))
+                        (row["rating"] * 2 if row["rating"] else None) , row["votes"], row["start_yr"], row["finish_yr"], row["release_season"]))
                 anime_id = update.fetchone()["id"]
                 for mapping in cw_ids:
                     update.execute("INSERT INTO result.anime_titles_content_warnings(anime_title_id, content_warning_id) VALUES (%s, %s)", (anime_id, mapping))
