@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS sources.recommendations_db (
     studio TEXT,
     rating FLOAT,
     scored_by INT,
-    popularity INT,
+    popularity FLOAT,
     members FLOAT,
     episodes INT,
     source TEXT,

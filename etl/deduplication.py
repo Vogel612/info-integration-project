@@ -1,16 +1,16 @@
+#!/bin/env python3
+
 import psycopg
 from psycopg.rows import dict_row
 
-import pandas as pd
 import nltk
-import string
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-import copy
 from nltk.util import ngrams
+import string
+import copy
 from queue import Queue
 
-
+debug = False
 threshold=0.55
 
 def check_dup(str1,str2):
@@ -43,79 +43,75 @@ def check_dup(str1,str2):
             t += token
 
         row = copy.deepcopy(t)
-        # print(row)
         return row
+
     str1Token = splitch(str1Token)
     str2Token = splitch(str2Token)
 
     str1ngrams = [u''.join(w) for w in ngrams(str1Token, 3)]
     str2ngrams = [u''.join(w) for w in ngrams(str2Token, 3)]
-    def similarity(listA, listB, threshold=0.55):
+
+    def similarity(listA, listB):
         joint = set(listA).intersection(set(listB))  # get the joint
         union = set(listA).union(set(listB))
         if (len(union)==0):
             sim = 0
         else:
             sim = len(joint) / len(union)
-
         return sim
     return similarity(str1ngrams,str2ngrams)
 
-def merge(row1,row2):
-    if(row1['synopsis']!=None):
-        if(row2['synopsis']!=None):
-            row2['synopsis'] += row1['synopsis']
+def merge(delete, merge_target):
+    if delete['synopsis']:
+        if merge_target['synopsis']:
+            merge_target['synopsis'] += delete['synopsis']
         else:
-            row2['synopsis'] = row1['synopsis']
+            merge_target['synopsis'] = delete['synopsis']
 
+    if not merge_target['score']:
+        merge_target['score'] = delete['score']
+    elif not delete['score']:
+        # compute merged score as arithmetic mean (not sure how well that works for more than two duplicates?)
+        merge_target['score'] = (delete['score'] + merge_target['score']) / 2
 
-    if(row2['duration_in_minutes']==None):
-        row2['duration_in_minutes'] = row1['duration_in_minutes']
-    if(row2['number_of_episodes'] ==None):
-        row2['number_of_episodes'] = row1['number_of_episodes']
-    if (row2['media_type'] == None):
-        row2['media_type'] = row1['media_type']
+    # prefer merge_target information over delete, where present
+    if not merge_target['duration_in_minutes']:
+        merge_target['duration_in_minutes'] = delete['duration_in_minutes']
+    if not merge_target['number_of_episodes']:
+        merge_target['number_of_episodes'] = delete['number_of_episodes']
+    if not merge_target['media_type']:
+        merge_target['media_type'] = delete['media_type']
 
-    if (row2['score'] == None):
-        row2['score'] = row1['score']
-    if((not row2['score'] == None) and (not row2['score'] != None)):
-        row2['score'] = (row1['score']+row2['score'])/2
+    if not merge_target['scored_by']:
+        merge_target['scored_by'] = delete['scored_by']
 
-    if (row2['scored_by'] == None):
-        row2['scored_by'] = row1['scored_by']
+    if not merge_target['popularity']:
+        merge_target['popularity'] = delete['popularity']
+    if not merge_target['source']:
+        merge_target['source'] = delete['source']
+    if not merge_target['start_year']:
+        merge_target['start_year'] = delete['start_year']
+    if not merge_target['finish_year']:
+        merge_target['finish_year'] = delete['finish_year']
+    if not merge_target['season_of_release']:
+        merge_target['season_of_release'] = delete['season_of_release']
+    if not merge_target['esrb_rating']:
+        merge_target['esrb_rating'] = delete['esrb_rating']
+    if not merge_target['broadcast_time']:
+        merge_target['broadcast_time'] = delete['broadcast_time']
 
-    if (row2['popularity'] == None):
-        row2['popularity'] = row1['popularity']
-    if (row2['source'] == None):
-        row2['source'] = row1['source']
-    if (row2['start_year'] == None):
-        row2['start_year'] = row1['start_year']
-    if (row2['finish_year'] == None):
-        row2['finish_year'] = row1['finish_year']
-    if (row2['season_of_release'] == None):
-        row2['season_of_release'] = row1['season_of_release']
-    if (row2['esrb_rating'] == None):
-        row2['esrb_rating'] = row1['esrb_rating']
-    if (row2['broadcast_time'] == None):
-        row2['broadcast_time'] = row1['broadcast_time']
-
-    return row2
+    return merge_target
 
 def find_dup_update():
 
     with psycopg.connect("host=127.0.0.1 dbname=integrated_system user=postgres password=password", row_factory=dict_row) as conn:
         with conn.cursor() as cursor, conn.cursor() as update:
-            cursor.execute(
-                """SELECT * FROM result.anime_titles ORDER BY title DESC""")
+            cursor.execute("""SELECT * FROM result.anime_titles ORDER BY title DESC""")
 
-         
-
+            #1 sorted neighborhood
+            first = True
 
             for row in cursor:
-
-             
-
-                
                 #window size = 2
                 if(first):
                     title2 = row['title']
@@ -129,15 +125,15 @@ def find_dup_update():
                     check_dup(title1,title2)
                     sim = check_dup(title1, title2)
 
-                    #print("similarity=",sim)
                     update.execute("SELECT * FROM result.anime_titles WHERE id = %s",([id1]))
-
                     result1 = update.fetchone()
+
                     update.execute("SELECT * FROM result.anime_titles WHERE id = %s", ([id2]))
                     # many records' year = None, thus only consider num_episodes
                     result2 = update.fetchone()
 
                     #weighted similarity
+                    # TODO: Extract into separate method :D
                     sim+=(1 if(result1['duration_in_minutes']==result2['duration_in_minutes']) else -1)*(0.05 if((not result1['duration_in_minutes']== None) and (not ['duration_in_minutes']==None)) else 0)
                     sim += (1 if (result1['number_of_episodes'] == result2['number_of_episodes']) else -1) * (0.05 if ((not result1['number_of_episodes'] == None) and (not ['number_of_episodes']==None)) else 0)
                     sim+=(1 if(result1['start_year']==result2['start_year']) else -1)*(0.05 if((not result1['start_year']== None) and (not ['start_year']==None)) else 0)
@@ -158,37 +154,55 @@ def find_dup_update():
                         update.execute("SELECT * FROM result.anime_titles WHERE id = %s", ([mergeid])) #foreign key
                         merged_row = update.fetchone()
                         merged_info = merge(delete_row,merged_row)
-                        print("MERGE FOLLOWING INFO--")
-                        print(delete_row)
-                        print(merged_row)
-                        print("TO--")
-                        print(merged_info)
+                        if debug:
+                            print("MERGE FOLLOWING INFO--")
+                            print(delete_row)
+                            print(merged_row)
+                            print("TO--")
+                            print(merged_info)
 
 
                         #merge execute (merge)
-                        update.execute(
-                            "UPDATE result.anime_titles SET synopsis=%s,duration_in_minutes=%s,number_of_episodes=%s,media_type=%s,score=%s,scored_by=%s,popularity=%s,source=%s,start_year=%s,finish_year=%s,season_of_release=%s,esrb_rating=%s,broadcast_time=%s",
-                            ( merged_info['synopsis'],merged_info['duration_in_minutes'],merged_info['number_of_episodes'],merged_info['media_type'],merged_info['score'],merged_info['scored_by'],merged_info['popularity'],merged_info['source'],merged_info['start_year'],merged_info['finish_year'],merged_info['season_of_release'],merged_info['esrb_rating'],merged_info['broadcast_time'],))
+                        update.execute("""UPDATE result.anime_titles SET 
+                            synopsis=%s, duration_in_minutes=%s, number_of_episodes=%s, media_type=%s, score=%s,
+                            scored_by=%s, popularity=%s, source=%s, start_year=%s, finish_year=%s, season_of_release=%s,
+                            esrb_rating=%s, broadcast_time=%s
+                            WHERE id=%s""",
+                            (merged_info['synopsis'],
+                                merged_info['duration_in_minutes'],
+                                merged_info['number_of_episodes'],
+                                merged_info['media_type'],
+                                merged_info['score'],
+                                merged_info['scored_by'],
+                                merged_info['popularity'],
+                                merged_info['source'],
+                                merged_info['start_year'],
+                                merged_info['finish_year'],
+                                merged_info['season_of_release'],
+                                merged_info['esrb_rating'],
+                                merged_info['broadcast_time'],
+                            mergeid))
 
-                        #delete execute
-                         #delete from children tables
-                        update.execute("DELETE FROM result.anime_titles_content_warnings AS t2  WHERE t2.anime_title_id= %s", (deleteid,))
-                        update.execute(
-                            "DELETE FROM result.anime_titles_producers AS t2  WHERE t2.anime_title_id= %s",
-                            (deleteid,))
-                        update.execute(
-                            "DELETE FROM result.anime_titles_genres AS t2  WHERE t2.anime_title_id= %s",
-                            (deleteid,))
-                        update.execute(
-                            "DELETE FROM result.anime_titles_studios AS t2  WHERE t2.anime_title_id= %s",
-                            (deleteid,))
-                         #delete from parent table
-                        update.execute("DELETE FROM result.anime_titles AS t2  WHERE t2.id= %s",
-                            (deleteid,))  # foreign key
+                        # merge dependent table records
+                        update.execute("""UPDATE result.anime_titles_content_warnings
+                            SET anime_title_id=%s WHERE anime_title_id=%s""", (mergeid, deleteid))
+                        update.execute("""UPDATE result.anime_titles_producers
+                            SET anime_title_id=%s WHERE anime_title_id= %s""", (mergeid, deleteid))
+                        update.execute("""UPDATE result.anime_titles_genres
+                            SET anime_title_id=%s WHERE anime_title_id= %s""", (mergeid, deleteid))
+                        update.execute("""UPDATE result.anime_titles_studios
+                            SET anime_title_id=%s WHERE anime_title_id= %s""", (mergeid, deleteid))
 
+                        # FIXME? deduplicate dependent tables (to avoid double-counting matching dependent records)
 
-
+                        # delete from main table
+                        update.execute("DELETE FROM result.anime_titles WHERE id= %s", (deleteid,))
 
 
 if __name__ == '__main__':
+    # download nltk modules
+    nltk.download("punkt")
+    nltk.download("stopwords")
+    nltk.download("wordnet")
+    nltk.download("omw-1.4")
     find_dup_update()
