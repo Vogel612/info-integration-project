@@ -108,20 +108,14 @@ def find_dup_update():
             cursor.execute(
                 """SELECT * FROM result.anime_titles ORDER BY title DESC""")
 
-            #1 sorted neighborhood
-
-
-            first = True
-            n=1
+         
 
 
             for row in cursor:
 
-                if(n==10):
-                    break
+             
 
-                print(row['id'],row['title'])
-                '''
+                
                 #window size = 2
                 if(first):
                     title2 = row['title']
@@ -192,8 +186,6 @@ def find_dup_update():
                         update.execute("DELETE FROM result.anime_titles AS t2  WHERE t2.id= %s",
                             (deleteid,))  # foreign key
 
-                '''
-                n+=1
 
 
 
