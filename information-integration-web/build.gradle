@@ -1,3 +1,5 @@
+import org.ysb33r.gradle.nodejs.tasks.NpmTask
+
 plugins {
     id 'org.springframework.boot' version '2.5.0'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
@@ -31,6 +33,39 @@ java{
     }
 }
 
+nodejs {
+    executableBySearchPath('node')
+}
+
 npm {
+    executableBySearchPath('npm')
     homeDirectory = 'web'
+}
+
+task frontendDeps(type: NpmTask ) {
+    workingDir npm.homeDirectory
+    inputs.files fileTree(workingDir).matching {
+        include 'package.json'
+    }
+    outputs.files fileTree(workingDir).matching {
+        include 'node_modules/'
+        include 'package-lock.json'
+    }
+
+    command 'install'
+}
+
+task buildFrontend(type: NpmTask ) {
+    workingDir npm.homeDirectory
+    dependsOn frontendDeps
+
+    inputs.files fileTree(workingDir).matching {
+        exclude 'dist/'
+    }
+    outputs.files fileTree(workingDir).matching {
+        include 'dist/'
+    }
+
+    command 'run'
+    cmdArgs 'build'
 }
