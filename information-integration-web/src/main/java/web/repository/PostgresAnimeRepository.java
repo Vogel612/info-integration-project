@@ -42,25 +42,38 @@ public class PostgresAnimeRepository implements AnimeRepository {
 
     @Override
     public List<AnimeTitleWithWarnings> getTitlesWithContentWarnings(Set<String> warnings) {
-        return jdbcTemplate.query("SELECT * FROM result.anime_titles at RIGHT JOIN result.content_warnings cw USING(id)",
+        return jdbcTemplate.query("""
+                SELECT * FROM result.anime_titles at
+                    RIGHT JOIN result.anime_titles_content_warnings m ON at.id = m.anime_title_id
+                    RIGHT JOIN result.content_warnings cw ON m.content_warning_id = cw.id""",
                 new AnimeWithWarningRowMapper());
     }
 
     @Override
     public List<AnimeTitle> getTitlesByGenre(String genre) {
-        return jdbcTemplate.query("SELECT * FROM result.anime_titles at LEFT JOIN result.anime_titles_genres USING(id)",
+        return jdbcTemplate.query("""
+                SELECT * FROM result.anime_titles at
+                    RIGHT JOIN result.anime_titles_genres m ON at.id = m.anime_title_id
+                    RIGHT JOIN result.genres g ON m.genre_id = g.id
+                """,
                 new AnimeRowMapper());
     }
 
     @Override
     public List<AnimeTitle> getTitlesByProducer(String producer) {
-        return jdbcTemplate.query("SELECT * FROM result.anime_titles at LEFT JOIN result.anime_titles_producers USING(id)",
+        return jdbcTemplate.query("""
+                SELECT * FROM result.anime_titles at
+                    RIGHT JOIN result.anime_titles_producers m ON m.anime_title_id = at.id
+                    RIGHT JOIN result.producers p ON m.producer_id = p.id""",
                 new AnimeRowMapper());
     }
 
     @Override
     public List<AnimeTitle> getTitlesByStudio(String studio) {
-        return jdbcTemplate.query("SELECT * FROM result.anime_titles at LEFT JOIN result.anime_titles_studios USING(id)",
+        return jdbcTemplate.query("""
+                SELECT * FROM result.anime_titles at
+                    RIGHT JOIN result.anime_titles_studios m ON at.id = m.anime_title_id
+                    RIGHT JOIN result.studios s ON m.studio_id = s.id""",
                 new AnimeRowMapper());
     }
 }
