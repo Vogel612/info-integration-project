@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.5.0'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
+    id 'org.ysb33r.nodejs.npm' version '0.12.1'
 }
 
 group = 'com.example'
@@ -28,4 +29,8 @@ java{
     toolchain {
         languageVersion = JavaLanguageVersion.of(15)
     }
+}
+
+npm {
+    homeDirectory = 'web'
 }
