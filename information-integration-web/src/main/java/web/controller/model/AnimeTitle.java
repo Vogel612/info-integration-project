@@ -23,12 +23,20 @@ public class AnimeTitle {
     private int finishYear;
     @JsonProperty("season_of_release")
     private String seasonOfRelease;
+    @JsonProperty("content_warnings")
+    private String[] contentWarnings;
+    @JsonProperty("genres")
+    private String[] genres;
+    @JsonProperty("producers")
+    private String[] producers;
+    @JsonProperty("studios")
+    private String[] studios;
 
     public AnimeTitle(
             int id, String title, int duration, int numberOfEpisodes,
             String mediaType, float score, String source,
-            int startYear, int finishYear, String seasonOfRelease
-    ) {
+            int startYear, int finishYear, String seasonOfRelease,
+            String[] contentWarnings, String[] genres, String[] producers, String[] studios) {
         this.id = id;
         this.title = title;
         this.duration = duration;
@@ -39,6 +47,10 @@ public class AnimeTitle {
         this.startYear = startYear;
         this.finishYear = finishYear;
         this.seasonOfRelease = seasonOfRelease;
+        this.contentWarnings = contentWarnings;
+        this.genres = genres;
+        this.producers = producers;
+        this.studios = studios;
     }
 
     public String getTitle() {
@@ -119,5 +131,37 @@ public class AnimeTitle {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String[] getGenres() {
+        return genres;
+    }
+
+    public void setGenres(String[] genres) {
+        this.genres = genres;
+    }
+
+    public String[] getContentWarnings() {
+        return contentWarnings;
+    }
+
+    public void setContentWarnings(String[] contentWarnings) {
+        this.contentWarnings = contentWarnings;
+    }
+
+    public String[] getProducers() {
+        return producers;
+    }
+
+    public void setProducers(String[] producers) {
+        this.producers = producers;
+    }
+
+    public String[] getStudios() {
+        return studios;
+    }
+
+    public void setStudios(String[] studios) {
+        this.studios = studios;
     }
 }

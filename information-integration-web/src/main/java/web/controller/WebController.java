@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@RestController
+@RestController("/api")
 public class WebController {
 
     @Autowired
@@ -42,23 +42,23 @@ public class WebController {
     }
 
     @GetMapping("/titles/warning")
-    public List<AnimeTitleWithWarnings> titlesWithoutContentWarnings(@RequestParam String warning) {
+    public List<AnimeTitle> titlesWithoutContentWarnings(@RequestParam String warning) {
         Set<String> warnings = Arrays.stream(warning.split(",")).collect(Collectors.toSet());
         return repository.getTitlesWithoutContentWarnings(warnings);
     }
 
     @GetMapping("/titles/by_genre")
-    public List<AnimeTitleWithGenres> titlesByGenre(@RequestParam("genre") String genre) {
+    public List<AnimeTitle> titlesByGenre(@RequestParam("genre") String genre) {
         return repository.getTitlesByGenre(genre);
     }
 
     @GetMapping("/titles/by_producer")
-    public List<AnimeTitleWithProducers> titlesByProducer(@RequestParam("producer") String producer) {
+    public List<AnimeTitle> titlesByProducer(@RequestParam("producer") String producer) {
         return repository.getTitlesByProducer(producer);
     }
 
     @GetMapping("/titles/by_studio")
-    public List<AnimeTitleWithStudios> titlesByStudio(@RequestParam("studio") String studio) {
+    public List<AnimeTitle> titlesByStudio(@RequestParam("studio") String studio) {
         return repository.getTitlesByStudio(studio);
     }
 }

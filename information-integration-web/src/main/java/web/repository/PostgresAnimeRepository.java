@@ -4,9 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import web.controller.model.*;
-import web.repository.mapper.*;
+import web.controller.model.AnimeTitle;
+import web.repository.mapper.AnimeRowMapper;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,18 +15,31 @@ import java.util.stream.Collectors;
 @Repository
 public class PostgresAnimeRepository implements AnimeRepository {
     private static final RowMapper<AnimeTitle> ANIME_TITLE_ROW_MAPPER = new AnimeRowMapper();
+    private static final String TITLES_SQL = "select * from result.anime_titles at " +
+            "left join (select anime_title_id, array_agg(warning) as warning from result.anime_titles_content_warnings atcw " +
+            "left join result.content_warnings cw on atcw.content_warning_id = cw.id " +
+            "group by anime_title_id) cw on at.id = cw.anime_title_id " +
+            "left join (select anime_title_id, array_agg(genre) as genre from result.anime_titles_genres atg " +
+            "left join result.genres g on atg.genre_id = g.id " +
+            "group by anime_title_id) g on at.id = g.anime_title_id " +
+            "left join (select anime_title_id, array_agg(producer) as producer from result.anime_titles_producers atp " +
+            "left join result.producers p on atp.producer_id = p.id " +
+            "group by anime_title_id) p on at.id = p.anime_title_id " +
+            "left join (select anime_title_id, array_agg(studio) as studio from result.anime_titles_studios ats " +
+            "left join result.studios s on ats.studio_id = s.id " +
+            "group by anime_title_id) s on at.id = s.anime_title_id";
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Override
     public List<AnimeTitle> getAllTitles() {
-        return jdbcTemplate.query("SELECT * FROM result.anime_titles", ANIME_TITLE_ROW_MAPPER);
+        return jdbcTemplate.query(TITLES_SQL, ANIME_TITLE_ROW_MAPPER);
     }
 
     @Override
     public List<AnimeTitle> getTitlesRanked() {
-        return jdbcTemplate.query("SELECT * FROM result.anime_titles ORDER BY score", ANIME_TITLE_ROW_MAPPER);
+        return jdbcTemplate.query(TITLES_SQL + " order by score", ANIME_TITLE_ROW_MAPPER);
     }
 
     @Override
@@ -35,43 +49,30 @@ public class PostgresAnimeRepository implements AnimeRepository {
 
     @Override
     public List<AnimeTitle> getTitlesByYear(int from, int to) {
-        return jdbcTemplate.query("SELECT * FROM result.anime_titles WHERE start_year > ? AND start_year < ?",
-                ANIME_TITLE_ROW_MAPPER, from, to);
+        return jdbcTemplate.query(TITLES_SQL + " where start_year > ? and start_year < ?", ANIME_TITLE_ROW_MAPPER, from, to);
     }
 
-    // todo - group by for below queries
     @Override
-    public List<AnimeTitleWithWarnings> getTitlesWithoutContentWarnings(Set<String> warnings) {
-        List<AnimeTitleWithWarnings> animeTitleWithWarnings = jdbcTemplate.query("SELECT * FROM result.anime_titles at " +
-                "LEFT JOIN result.anime_titles_content_warnings atcw ON at.id = atcw.anime_title_id " +
-                "LEFT JOIN result.content_warnings cw on atcw.content_warning_id = cw.id", new AnimeWithWarningRowMapper());
+    public List<AnimeTitle> getTitlesWithoutContentWarnings(Set<String> warnings) {
+        List<AnimeTitle> animeTitleWithWarnings = jdbcTemplate.query(TITLES_SQL, ANIME_TITLE_ROW_MAPPER);
 
         return animeTitleWithWarnings.stream()
-                .filter(anime -> anime.getWarnings().stream().noneMatch(warnings::contains))
+                .filter(anime -> Arrays.stream(anime.getContentWarnings()).noneMatch(warnings::contains))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<AnimeTitleWithGenres> getTitlesByGenre(String genre) {
-        return jdbcTemplate.query("SELECT * FROM result.anime_titles at " +
-                "LEFT JOIN result.anime_titles_genres atg ON at.id = atg.anime_title_id " +
-                "LEFT JOIN result.genres g ON atg.genre_id = g.id " +
-                "WHERE genre = ?", new AnimeWithGenresRowMapper(), genre);
+    public List<AnimeTitle> getTitlesByGenre(String genre) {
+        return jdbcTemplate.query(TITLES_SQL + " WHERE ? = ANY(genre)", ANIME_TITLE_ROW_MAPPER, genre);
     }
 
     @Override
-    public List<AnimeTitleWithProducers> getTitlesByProducer(String producer) {
-        return jdbcTemplate.query("SELECT * FROM result.anime_titles at " +
-                "LEFT JOIN result.anime_titles_producers atp ON at.id = atp.anime_title_id " +
-                "LEFT JOIN result.producers p ON atp.producer_id = p.id " +
-                "WHERE producer = ?", new AnimeWithProducersRowMapper(), producer);
+    public List<AnimeTitle> getTitlesByProducer(String producer) {
+        return jdbcTemplate.query(TITLES_SQL + " WHERE ? = ANY(producer)", ANIME_TITLE_ROW_MAPPER, producer);
     }
 
     @Override
-    public List<AnimeTitleWithStudios> getTitlesByStudio(String studio) {
-        return jdbcTemplate.query("SELECT * FROM result.anime_titles at " +
-                "LEFT JOIN result.anime_titles_studios ats ON at.id = ats.anime_title_id " +
-                "LEFT JOIN result.studios s on ats.studio_id = s.id " +
-                "WHERE studio = ?", new AnimeWithStudiosRowMapper(), studio);
+    public List<AnimeTitle> getTitlesByStudio(String studio) {
+        return jdbcTemplate.query(TITLES_SQL + " WHERE ? = ANY(studio)", ANIME_TITLE_ROW_MAPPER, studio);
     }
 }
