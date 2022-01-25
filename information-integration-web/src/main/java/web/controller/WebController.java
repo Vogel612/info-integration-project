@@ -18,47 +18,52 @@ public class WebController {
     @Autowired
     private AnimeRepository repository;
 
-    @GetMapping("/titles")
+    @GetMapping("api/titles")
     public List<AnimeTitle> titles() {
         return repository.getAllTitles();
     }
 
-    @GetMapping("/titles/ranked")
+    @GetMapping("api/titles/ranked")
     public List<AnimeTitle> titlesRanked() {
         return repository.getTitlesRanked();
     }
 
-    @GetMapping("/title/synopsis")
+    @GetMapping("api/title/synopsis")
     public String titleSynopsis(@RequestParam int id) {
         return repository.getTitleSynopsis(id);
     }
 
-    @GetMapping("/titles/by_year")
+    @GetMapping("api/titles/by_year")
     public List<AnimeTitle> titlesByYears(
             @RequestParam(value = "from", defaultValue = "0") int from,
-            @RequestParam(value = "to", defaultValue = "2022") int to
+            @RequestParam(value = "to", defaultValue = "2030") int to
     ) {
         return repository.getTitlesByYear(from, to);
     }
 
-    @GetMapping("/titles/warning")
-    public List<AnimeTitleWithWarnings> titlesWithoutContentWarnings(@RequestParam String warning) {
+    @GetMapping("api/titles/warning")
+    public List<AnimeTitle> titlesWithoutContentWarnings(@RequestParam String warning) {
         Set<String> warnings = Arrays.stream(warning.split(",")).collect(Collectors.toSet());
         return repository.getTitlesWithoutContentWarnings(warnings);
     }
 
-    @GetMapping("/titles/by_genre")
-    public List<AnimeTitleWithGenres> titlesByGenre(@RequestParam("genre") String genre) {
+    @GetMapping("api/titles/by_genre")
+    public List<AnimeTitle> titlesByGenre(@RequestParam("genre") String genre) {
         return repository.getTitlesByGenre(genre);
     }
 
-    @GetMapping("/titles/by_producer")
-    public List<AnimeTitleWithProducers> titlesByProducer(@RequestParam("producer") String producer) {
+    @GetMapping("api/titles/by_producer")
+    public List<AnimeTitle> titlesByProducer(@RequestParam("producer") String producer) {
         return repository.getTitlesByProducer(producer);
     }
 
-    @GetMapping("/titles/by_studio")
-    public List<AnimeTitleWithStudios> titlesByStudio(@RequestParam("studio") String studio) {
+    @GetMapping("api/titles/by_studio")
+    public List<AnimeTitle> titlesByStudio(@RequestParam("studio") String studio) {
         return repository.getTitlesByStudio(studio);
+    }
+
+    @GetMapping("api/titles/duration_not_more")
+    public List<AnimeTitle> titlesByStudio(@RequestParam int duration, @RequestParam int episodes) {
+        return repository.getTitlesWithSpecificDuration(duration, episodes);
     }
 }

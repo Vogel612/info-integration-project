@@ -15,11 +15,13 @@ public interface AnimeRepository {
 
     List<AnimeTitle> getTitlesByYear(int from, int to);
 
-    List<AnimeTitleWithWarnings> getTitlesWithoutContentWarnings(Set<String> warnings);
+    List<AnimeTitle> getTitlesWithoutContentWarnings(Set<String> warnings);
 
-    List<AnimeTitleWithGenres> getTitlesByGenre(String genre);
+    List<AnimeTitle> getTitlesByGenre(String genre);
 
-    List<AnimeTitleWithProducers> getTitlesByProducer(String producer);
+    List<AnimeTitle> getTitlesByProducer(String producer);
 
-    List<AnimeTitleWithStudios> getTitlesByStudio(String studio);
+    List<AnimeTitle> getTitlesByStudio(String studio);
+
+    List<AnimeTitle> getTitlesWithSpecificDuration(int duration, int episodes);
 }
