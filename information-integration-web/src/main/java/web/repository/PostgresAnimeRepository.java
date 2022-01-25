@@ -39,7 +39,7 @@ public class PostgresAnimeRepository implements AnimeRepository {
 
     @Override
     public List<AnimeTitle> getTitlesRanked() {
-        return jdbcTemplate.query(TITLES_SQL + " order by score", ANIME_TITLE_ROW_MAPPER);
+        return jdbcTemplate.query(TITLES_SQL + " order by score desc", ANIME_TITLE_ROW_MAPPER);
     }
 
     @Override
@@ -49,12 +49,12 @@ public class PostgresAnimeRepository implements AnimeRepository {
 
     @Override
     public List<AnimeTitle> getTitlesByYear(int from, int to) {
-        return jdbcTemplate.query(TITLES_SQL + " where start_year > ? and start_year < ?", ANIME_TITLE_ROW_MAPPER, from, to);
+        return jdbcTemplate.query(TITLES_SQL + " where start_year > ? and finish_year < ? order by score desc", ANIME_TITLE_ROW_MAPPER, from, to);
     }
 
     @Override
     public List<AnimeTitle> getTitlesWithoutContentWarnings(Set<String> warnings) {
-        List<AnimeTitle> animeTitleWithWarnings = jdbcTemplate.query(TITLES_SQL, ANIME_TITLE_ROW_MAPPER);
+        List<AnimeTitle> animeTitleWithWarnings = jdbcTemplate.query(TITLES_SQL + " order by score desc", ANIME_TITLE_ROW_MAPPER);
 
         return animeTitleWithWarnings.stream()
                 .filter(anime -> Arrays.stream(anime.getContentWarnings()).noneMatch(warnings::contains))
@@ -63,16 +63,22 @@ public class PostgresAnimeRepository implements AnimeRepository {
 
     @Override
     public List<AnimeTitle> getTitlesByGenre(String genre) {
-        return jdbcTemplate.query(TITLES_SQL + " WHERE ? = ANY(genre)", ANIME_TITLE_ROW_MAPPER, genre);
+        return jdbcTemplate.query(TITLES_SQL + " WHERE ? = ANY(genre) order by score desc", ANIME_TITLE_ROW_MAPPER, genre);
     }
 
     @Override
     public List<AnimeTitle> getTitlesByProducer(String producer) {
-        return jdbcTemplate.query(TITLES_SQL + " WHERE ? = ANY(producer)", ANIME_TITLE_ROW_MAPPER, producer);
+        return jdbcTemplate.query(TITLES_SQL + " WHERE ? = ANY(producer) order by score desc", ANIME_TITLE_ROW_MAPPER, producer);
     }
 
     @Override
     public List<AnimeTitle> getTitlesByStudio(String studio) {
-        return jdbcTemplate.query(TITLES_SQL + " WHERE ? = ANY(studio)", ANIME_TITLE_ROW_MAPPER, studio);
+        return jdbcTemplate.query(TITLES_SQL + " WHERE ? = ANY(studio) order by score desc", ANIME_TITLE_ROW_MAPPER, studio);
+    }
+
+    @Override
+    public List<AnimeTitle> getTitlesWithSpecificDuration(int duration, int episodes) {
+        return jdbcTemplate.query(TITLES_SQL + " WHERE duration_in_minutes <= ? and number_of_episodes <= ? order by score desc",
+                ANIME_TITLE_ROW_MAPPER, duration, episodes);
     }
 }

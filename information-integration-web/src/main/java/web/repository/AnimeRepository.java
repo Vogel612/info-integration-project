@@ -22,4 +22,6 @@ public interface AnimeRepository {
     List<AnimeTitle> getTitlesByProducer(String producer);
 
     List<AnimeTitle> getTitlesByStudio(String studio);
+
+    List<AnimeTitle> getTitlesWithSpecificDuration(int duration, int episodes);
 }

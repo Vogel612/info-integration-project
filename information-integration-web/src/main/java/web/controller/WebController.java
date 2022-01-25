@@ -36,7 +36,7 @@ public class WebController {
     @GetMapping("api/titles/by_year")
     public List<AnimeTitle> titlesByYears(
             @RequestParam(value = "from", defaultValue = "0") int from,
-            @RequestParam(value = "to", defaultValue = "2022") int to
+            @RequestParam(value = "to", defaultValue = "2030") int to
     ) {
         return repository.getTitlesByYear(from, to);
     }
@@ -60,5 +60,10 @@ public class WebController {
     @GetMapping("api/titles/by_studio")
     public List<AnimeTitle> titlesByStudio(@RequestParam("studio") String studio) {
         return repository.getTitlesByStudio(studio);
+    }
+
+    @GetMapping("api/titles/duration_not_more")
+    public List<AnimeTitle> titlesByStudio(@RequestParam int duration, @RequestParam int episodes) {
+        return repository.getTitlesWithSpecificDuration(duration, episodes);
     }
 }
