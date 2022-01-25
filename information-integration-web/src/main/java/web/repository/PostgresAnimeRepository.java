@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import web.controller.model.AnimeTitle;
-import web.controller.model.AnimeTitleWithGenres;
 import web.controller.model.AnimeTitleWithWarnings;
 import web.repository.mapper.AnimeRowMapper;
 import web.repository.mapper.AnimeWithWarningRowMapper;
@@ -48,20 +47,20 @@ public class PostgresAnimeRepository implements AnimeRepository {
     }
 
     @Override
-    public List<AnimeTitleWithGenres> getTitlesByGenre(String genre) {
+    public List<AnimeTitle> getTitlesByGenre(String genre) {
         return jdbcTemplate.query("SELECT * FROM result.anime_titles at LEFT JOIN result.anime_titles_genres USING(id)",
-                new AnimeWithWarningRowMapper());
+                new AnimeRowMapper());
     }
 
     @Override
     public List<AnimeTitle> getTitlesByProducer(String producer) {
         return jdbcTemplate.query("SELECT * FROM result.anime_titles at LEFT JOIN result.anime_titles_producers USING(id)",
-                new AnimeWithWarningRowMapper());
+                new AnimeRowMapper());
     }
 
     @Override
     public List<AnimeTitle> getTitlesByStudio(String studio) {
-        return jdbcTemplate.query("SELECT * FROM result.anime_titles at LEFT JOIN result.anime_titles_studio USING(id)",
-                new AnimeWithWarningRowMapper());
+        return jdbcTemplate.query("SELECT * FROM result.anime_titles at LEFT JOIN result.anime_titles_studios USING(id)",
+                new AnimeRowMapper());
     }
 }
