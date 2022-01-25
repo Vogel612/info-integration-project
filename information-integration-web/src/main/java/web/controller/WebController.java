@@ -4,8 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import web.controller.model.AnimeTitle;
-import web.controller.model.AnimeTitleWithWarnings;
+import web.controller.model.*;
 import web.repository.AnimeRepository;
 
 import java.util.Arrays;
@@ -43,23 +42,23 @@ public class WebController {
     }
 
     @GetMapping("/titles/warning")
-    public List<AnimeTitleWithWarnings> titlesWithContentWarnings(@RequestParam String warning) {
+    public List<AnimeTitleWithWarnings> titlesWithoutContentWarnings(@RequestParam String warning) {
         Set<String> warnings = Arrays.stream(warning.split(",")).collect(Collectors.toSet());
-        return repository.getTitlesWithContentWarnings(warnings);
+        return repository.getTitlesWithoutContentWarnings(warnings);
     }
 
     @GetMapping("/titles/by_genre")
-    public List<AnimeTitle> titlesByGenre(@RequestParam("genre") String genre) {
+    public List<AnimeTitleWithGenres> titlesByGenre(@RequestParam("genre") String genre) {
         return repository.getTitlesByGenre(genre);
     }
 
     @GetMapping("/titles/by_producer")
-    public List<AnimeTitle> titlesByProducer(@RequestParam("producer") String producer) {
+    public List<AnimeTitleWithProducers> titlesByProducer(@RequestParam("producer") String producer) {
         return repository.getTitlesByProducer(producer);
     }
 
     @GetMapping("/titles/by_studio")
-    public List<AnimeTitle> titlesByStudio(@RequestParam("studio") String studio) {
+    public List<AnimeTitleWithStudios> titlesByStudio(@RequestParam("studio") String studio) {
         return repository.getTitlesByStudio(studio);
     }
 }

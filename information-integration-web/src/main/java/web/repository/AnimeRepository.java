@@ -1,7 +1,6 @@
 package web.repository;
 
-import web.controller.model.AnimeTitle;
-import web.controller.model.AnimeTitleWithWarnings;
+import web.controller.model.*;
 
 import java.util.List;
 import java.util.Set;
@@ -16,11 +15,11 @@ public interface AnimeRepository {
 
     List<AnimeTitle> getTitlesByYear(int from, int to);
 
-    List<AnimeTitleWithWarnings> getTitlesWithContentWarnings(Set<String> warnings);
+    List<AnimeTitleWithWarnings> getTitlesWithoutContentWarnings(Set<String> warnings);
 
-    List<AnimeTitle> getTitlesByGenre(String genre);
+    List<AnimeTitleWithGenres> getTitlesByGenre(String genre);
 
-    List<AnimeTitle> getTitlesByProducer(String producer);
+    List<AnimeTitleWithProducers> getTitlesByProducer(String producer);
 
-    List<AnimeTitle> getTitlesByStudio(String studio);
+    List<AnimeTitleWithStudios> getTitlesByStudio(String studio);
 }
