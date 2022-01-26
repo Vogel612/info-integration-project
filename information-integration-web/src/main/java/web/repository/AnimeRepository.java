@@ -24,4 +24,6 @@ public interface AnimeRepository {
     List<AnimeTitle> getTitlesByStudio(String studio);
 
     List<AnimeTitle> getTitlesWithSpecificDuration(int duration, int episodes);
+
+    List<AnimeTitle> getUndiscoveredTitles();
 }

@@ -66,4 +66,9 @@ public class WebController {
     public List<AnimeTitle> titlesByStudio(@RequestParam int duration, @RequestParam int episodes) {
         return repository.getTitlesWithSpecificDuration(duration, episodes);
     }
+
+    @GetMapping("api/titles/undiscovered")
+    public List<AnimeTitle> titlesUndiscovered() {
+        return repository.getUndiscoveredTitles();
+    }
 }
