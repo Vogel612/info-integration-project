@@ -1,5 +1,6 @@
-import * as handlebars from 'handlebars/runtime';
+import 'bootstrap';
+import './style/base.css';
+
 
 let pc = require('./views/index.hbs');
-
-document.body.append(pc({}));
+document.body.innerHTML = pc({});
