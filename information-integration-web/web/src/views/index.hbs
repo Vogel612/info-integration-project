@@ -1,25 +1,44 @@
 
-<h1 class="header">Team NDA - Anime Database</h1>
+<header>
+    <h1 class="text-dark text-decoration-none">
+        Anime Database <span class="text-muted">- Team NDA</span>
+    </h1>
+</header>
 
-<div id="main-content" class="container-fluid">
+<div id="main-content" class="container container-xl d-grid gap-3 gap-xl-5">
     <div class="row">
-        <div class="col-first input-group input-group-lg input-group-text">
+        <div class="col input-group input-group-lg input-group-text">
             <input type="text" id="search" class="form-control"/>
             <span class="input-group-text"><i class="bi-search"></i></span>
         </div>
     </div>
-    <div class="row" role="visualization">
-        <div class="">
-            <a class="d-flex flex-row" data-bs-toggle="collapse" href="#vis-container">
-            <h3 class="flex-grow-1">Visualization</h3>
-                <i class="bi-arrows-collapse"></i>
-            </a>
-        </div>
-        <div class="flex-content collapse show" id="vis-container">
-            Lorem Ipsum Dolor Sit Amet shenanigans
+    <div class="row" role="banner">
+        <div class="col">
+            <div class="accordion open" id="visualization">
+                <div class="accordion-item p-3">
+                    <h1 class="accordion-header" id="vis-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#vis-container" aria-expanded="true" aria-controls="vis-container">
+                            Visualization
+                        </button>
+                    </h1>
+                    <div id="vis-container" class="accordion-collapse collapse show" aria-labelledby="vis-header">
+                        <div class="accordion-body p-5" id="vis-canvas">
+                            Lorem Ipsum Dolor Sit Amet
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="row" role="results" id="results">
+    <div class="row">
+        <div class="col">
+            <div class="p-3">
+                <h3>Results</h3>
+            </div>
+            <div id="results" role="listbox">
+
+            </div>
+        </div>
     </div>
 </div>
 
