@@ -42,14 +42,21 @@ npm {
     homeDirectory = 'web'
 }
 
+sourceSets {
+    main {
+        resources {
+            srcDirs += 'src/main/gen-resources'
+        }
+    }
+}
+
 task frontendDeps(type: NpmTask ) {
     workingDir npm.homeDirectory
     inputs.files fileTree(workingDir).matching {
         include 'package.json'
     }
     outputs.files fileTree(workingDir).matching {
-        include 'node_modules/'
-        include 'package-lock.json'
+        include 'node_modules/', 'package-lock.json'
     }
 
     command 'install'
@@ -69,3 +76,17 @@ task buildFrontend(type: NpmTask ) {
     command 'run'
     cmdArgs 'build'
 }
+
+task deleteFrontend {
+    delete fileTree('src/main/gen-resources/')
+}
+clean.dependsOn('deleteFrontend')
+
+task shipFrontend(type: Copy) {
+    dependsOn buildFrontend
+
+    from "${npm.homeDirectory}/dist/"
+    into 'src/main/gen-resources/static'
+}
+// add an explicit dependency on the frontend to the processResources task
+processResources.dependsOn('shipFrontend')
