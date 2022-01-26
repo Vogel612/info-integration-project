@@ -9,6 +9,7 @@ plugins {
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
+var devMode = deploymentMode == 'development'
 
 repositories {
     mavenCentral()
@@ -23,8 +24,18 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test')
 }
 
-test {
-    useJUnitPlatform()
+sourceSets {
+    main {
+        resources {
+            srcDirs += 'src/main/gen-resources'
+        }
+    }
+}
+
+if (devMode) {
+    bootRun {
+        sourceResources sourceSets.main
+    }
 }
 
 java{
@@ -40,14 +51,6 @@ nodejs {
 npm {
     executableBySearchPath('npm')
     homeDirectory = 'web'
-}
-
-sourceSets {
-    main {
-        resources {
-            srcDirs += 'src/main/gen-resources'
-        }
-    }
 }
 
 task frontendDeps(type: NpmTask ) {
@@ -74,7 +77,7 @@ task buildFrontend(type: NpmTask ) {
     }
 
     command 'run'
-    cmdArgs 'build'
+    cmdArgs devMode ? 'build:dev' : 'build'
 }
 
 task deleteFrontend {
