@@ -1,5 +1,6 @@
-/*@import 'bootstrap/dist/css/bootstrap-grid.min.css';*/
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap/dist/css/bootstrap-grid.min.css';
+@import 'bootstrap/dist/css/bootstrap-utilities.min.css';
+@import 'bootstrap/dist/css/bootstrap-reboot.min.css';
 
-h1 {
-    color: #339933
-}
+@import 'bootstrap-icons/font/bootstrap-icons.css';
