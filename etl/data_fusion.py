@@ -78,6 +78,8 @@ def merge(row_a, row_b):
         else:
             row_b['synopsis'] = row_a['synopsis']
 
+    row_b['duplicates'] = row_b['duplicates'] + row_a['duplicates']
+
     if not row_b['score']:
         row_b['score'] = row_a['score']
     if row_b['score'] and row_a['score']:
@@ -140,12 +142,30 @@ def hash(anime_title):
         map(lambda word: word[0].lower(), filter(lambda x: len(x) > 0, anime_title['title'].split(' '))))) + media_type
 
 
+def merge_dependent(table, engine, anime_titles_merged):
+    anime_titles_genres = pd.read_sql_query('select * from result.' + table, engine)
+    result = anime_titles_merged.explode('duplicates') \
+        .rename(columns={"duplicates": "anime_title_id"}) \
+        .merge(anime_titles_genres, on='anime_title_id') \
+        .drop('anime_title_id', axis=1)
+
+    result.to_sql(table + '_merged', engine, index=False)
+
+
+def merge_dependents(engine, anime_titles_merged):
+    merge_dependent("anime_titles_content_warnings", engine, anime_titles_merged)
+    merge_dependent("anime_titles_genres", engine, anime_titles_merged)
+    merge_dependent("anime_titles_producers", engine, anime_titles_merged)
+    merge_dependent("anime_titles_studios", engine, anime_titles_merged)
+
+
 def run_data_fusion():
     result = pd.DataFrame()
     engine = create_engine('postgresql://postgres:password@localhost:5432/integrated_system')
     # anime_titles = pd.read_sql_query('select * from result.anime_titles where title = \'Z/X: Ignition\'', engine)
-    anime_titles = pd.read_sql_query('select * from result.anime_titles where title = \'Z/X: Ignition\'', engine)
+    anime_titles = pd.read_sql_query('select * from result.anime_titles', engine)
     anime_titles['hash'] = anime_titles.apply(lambda row: hash(row), axis=1)
+    anime_titles['duplicates'] = anime_titles.apply(lambda row: [row['id']], axis=1)
 
     anime_titles.sort_values(by='hash')
 
@@ -153,15 +173,16 @@ def run_data_fusion():
     while i < len(anime_titles):
         current_row = anime_titles.iloc[i]
         j = i + 1
-        print(current_row['title'], anime_titles.iloc[j]['title'], weighted_score(current_row, anime_titles.iloc[j]))
         while j < len(anime_titles) and weighted_score(current_row, anime_titles.iloc[j]) > threshold:
+            print(current_row['title'], anime_titles.iloc[j]['title'],
+                  weighted_score(current_row, anime_titles.iloc[j]))
             current_row = merge(current_row, anime_titles.iloc[j])
             j += 1
         result = result.append(current_row)
         i = j
 
-    # print(len(result))
     result = result.drop('hash', axis=1)
+    merge_dependents(engine, result[['id', 'duplicates']].copy())
     result.to_sql('anime_titles_merged', engine, index=False)
 
 
