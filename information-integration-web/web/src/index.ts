@@ -103,6 +103,16 @@ function render() {
     });
     $('.collapse', content).each((_, el) => { let c = new bs.Collapse(el); });
     $('.collapse', content).on('shown.bs.collapse', () => dataHolder.resize());
+
+    const interact: any = {};
+    for (const key in api) {
+        interact[key] = (...args: any) => {
+            // @ts-ignore
+            api[key].apply(api, args).then(d => dataHolder.update(d));
+        }
+    }
+    // @ts-ignore
+    window['interact'] = interact;
 }
 
 $(render)
