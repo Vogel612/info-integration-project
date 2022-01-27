@@ -5,15 +5,26 @@ export class Api {
         this.base = baseUrl;
     }
 
-    async allTitles(this: Api): Promise<Array<any>> {
+    async allTitles(this: Api): Promise<AnimeTitle[]> {
         return fetch(`${this.base}/titles/`, {
             method: 'GET',
         }).then(response => {
             if (response.ok) {
-                return response.json() as unknown as Array<any>;
+                return response.json() as unknown as AnimeTitle[];
             } else {
                 throw "Response was not OK";
             }
+        });
+    }
+
+    async titlesBetween(this: Api, startYear: number, endYear: number = 2030): Promise<AnimeTitle[]> {
+        return fetch(`${this.base}/titles/by_year?from=${startYear}&to=${endYear}`, {
+            method: 'GET',
+        }).then(r => {
+            if (!r.ok) {
+                throw "Response was not OK";
+            }
+            return r.json() as unknown as AnimeTitle[];
         });
     }
 }
