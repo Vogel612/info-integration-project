@@ -106,7 +106,7 @@ def hash(anime_title):
         media_type = ''
     # return "".join(list(
     #     map(lambda word: word[0].lower(), filter(lambda x: len(x) > 0, anime_title['title'].split(' '))))) + media_type
-    # return anime_title['title'] + media_type
+    return anime_title['title'] + media_type
 
 
 def merge_dependent(table, engine, anime_titles_merged):
