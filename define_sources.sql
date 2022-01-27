@@ -81,34 +81,3 @@ CREATE TABLE IF NOT EXISTS sources.recommendations_db (
     aired TEXT,
     link TEXT
 );
-
-
-SELECT COUNT(*) = 0 AS e FROM sources.animeplanet;
-\gset
-\if :e
-    \copy sources.animeplanet(title, media_type, eps, duration, ongoing, start_yr, finish_yr, release_season, description, studios, tags, content_warn, watched, watching, want_watch, dropped, rating, votes) FROM '/home/vogel612/Documents/Uni/Master/current/InformationIntegration/project/datasets/animeplanet.csv' DELIMITER ',' CSV HEADER;
-\endif
-
-SELECT COUNT(*) = 0 AS e FROM sources.mal_anime;
-\gset
-\if :e
-    \copy sources.mal_anime FROM '/home/vogel612/Documents/Uni/Master/current/InformationIntegration/project/datasets/myanimelist.csv' DELIMITER ',' CSV HEADER;
-\endif
-
-SELECT COUNT(*) = 0 AS e FROM sources.mal_ratings;
-\gset
-\if :e
-    \copy sources.mal_ratings FROM '/home/vogel612/Documents/Uni/Master/current/InformationIntegration/project/datasets/mal_rating.csv' DELIMITER ',' CSV HEADER;
-\endif
-
-SELECT COUNT(*) = 0 AS e FROM sources.anime_data;
-\gset
-\if :e
-    \copy sources.anime_data(title, type, episodes, status, start_airing, end_airing, release_season, broadcast_slot, producers, licensors, studios, sources, genres, duration, esrb_rating, score, scored_by, members, favorites, description) FROM '/home/vogel612/Documents/Uni/Master/current/InformationIntegration/project/datasets/dataanime.csv' DELIMITER ',' CSV HEADER;
-\endif
-
-SELECT COUNT(*) = 0 AS e FROM sources.recommendations_db;
-\gset
-\if :e
-    \copy sources.recommendations_db FROM '/home/vogel612/Documents/Uni/Master/current/InformationIntegration/project/datasets/recommendation_data.csv' DELIMITER ',' CSV HEADER;
-\endif
