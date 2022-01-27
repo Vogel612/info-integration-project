@@ -7,7 +7,7 @@ from nltk.corpus import stopwords
 from nltk.util import ngrams
 import string
 
-threshold = 0.7
+threshold = 0.2
 
 def compute_ngrams(value):
     # import WordNet Lemmatizer
@@ -92,19 +92,11 @@ def merge(row_a, row_b):
 
 def weighted_score(result1, result2):
     score = check_dup(result1['title'], result2['title'])
+    score += (1 if (result1['media_type'] == result2['media_type']) else -3) * (
+        0.05 if (not result1['media_type'] is None and not ['media_type'] is None) else 0)
     # score+=(1 if(result1['duration_in_minutes']==result2['duration_in_minutes']) else -3)*(0.05 if((not result1['duration_in_minutes']== None) and (not ['duration_in_minutes']==None)) else 0)
     score += (1 if (result1['number_of_episodes'] == result2['number_of_episodes']) else -3) * (
         0.05 if (not result1['number_of_episodes'] is not None and not ['number_of_episodes'] is None) else 0)
-    score += (1 if (result1['start_year'] == result2['start_year']) else -3) * (
-        0.05 if (not result1['start_year'] is None and not ['start_year'] is None) else 0)
-    score += (1 if (result1['finish_year'] == result2['finish_year']) else -3) * (
-        0.05 if (not result1['finish_year'] is None and not ['finish_year'] is None) else 0)
-    score += (1 if (result1['season_of_release'] == result2['season_of_release']) else -3) * (
-        0.05 if (not result1['season_of_release'] is None and not ['season_of_release'] is None) else 0)
-    score += (1 if (result1['number_of_episodes'] == result2['number_of_episodes']) else -3) * (0.05 if (
-            (not result1['number_of_episodes'] is None) and (not ['number_of_episodes'] is None)) else 0)
-    score += (1 if (result1['season_of_release'] == result2['season_of_release']) else -3) * (0.05 if (
-            (not result1['season_of_release'] is None) and (not ['season_of_release'] is None)) else 0)
     return score
 
 
@@ -112,8 +104,9 @@ def hash(anime_title):
     media_type = anime_title['media_type']
     if media_type is None:
         media_type = ''
-    return "".join(list(
-        map(lambda word: word[0].lower(), filter(lambda x: len(x) > 0, anime_title['title'].split(' '))))) + media_type
+    # return "".join(list(
+    #     map(lambda word: word[0].lower(), filter(lambda x: len(x) > 0, anime_title['title'].split(' '))))) + media_type
+    return anime_title['title'] + media_type
 
 
 def merge_dependent(table, engine, anime_titles_merged):
