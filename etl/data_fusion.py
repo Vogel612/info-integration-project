@@ -62,7 +62,7 @@ def check_dup(str1, str2):
     def similarity(listA, listB):
         joint = set(listA).intersection(set(listB))  # get the joint
         union = set(listA).union(set(listB))
-        if (len(union) == 0):
+        if len(union) == 0:
             sim = 0
         else:
             sim = len(joint) / len(union)
@@ -118,19 +118,17 @@ def weighted_score(result1, result2):
     score = 0
     # score+=(1 if(result1['duration_in_minutes']==result2['duration_in_minutes']) else -3)*(0.05 if((not result1['duration_in_minutes']== None) and (not ['duration_in_minutes']==None)) else 0)
     score += (1 if (result1['number_of_episodes'] == result2['number_of_episodes']) else -3) * (
-        0.05 if ((not result1['number_of_episodes'] == None) and (not ['number_of_episodes'] == None)) else 0)
+        0.05 if (not result1['number_of_episodes'] is not None and not ['number_of_episodes'] is None) else 0)
     score += (1 if (result1['start_year'] == result2['start_year']) else -3) * (
-        0.05 if ((not result1['start_year'] == None) and (not ['start_year'] == None)) else 0)
+        0.05 if (not result1['start_year'] is None and not ['start_year'] is None) else 0)
     score += (1 if (result1['finish_year'] == result2['finish_year']) else -3) * (
-        0.05 if ((not result1['finish_year'] == None) and (not ['finish_year'] == None)) else 0)
+        0.05 if (not result1['finish_year'] is None and not ['finish_year'] is None) else 0)
     score += (1 if (result1['season_of_release'] == result2['season_of_release']) else -3) * (
-        0.05 if ((not result1['season_of_release'] == None) and (not ['season_of_release'] == None)) else 0)
+        0.05 if (not result1['season_of_release'] is None and not ['season_of_release'] is None) else 0)
     score += (1 if (result1['number_of_episodes'] == result2['number_of_episodes']) else -3) * (0.05 if (
-            (not result1['number_of_episodes'] == None) and (
-        not ['number_of_episodes'] == None)) else 0)
+            (not result1['number_of_episodes'] is None) and (not ['number_of_episodes'] is None)) else 0)
     score += (1 if (result1['season_of_release'] == result2['season_of_release']) else -3) * (0.05 if (
-            (not result1['season_of_release'] == None) and (
-        not ['season_of_release'] == None)) else 0)
+            (not result1['season_of_release'] is None) and (not ['season_of_release'] is None)) else 0)
     return score
 
 
