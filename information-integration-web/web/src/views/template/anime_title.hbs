@@ -2,6 +2,13 @@
     <div class="card-body">
         <input type="hidden" name="id" value="{{ ./id }}"/>
         <h5 class="card-title">{{ ./title }}</h5>
+        <ul class="list-group list-group-horizontal">
+            {{#each ./genres}}
+                <li class="list-group-item badge rounded-pill">
+                    {{.}}
+                </li>
+            {{/each}}
+        </ul>
         <p>
             {{./start_year}}{{#if ./finish_year}}-{{./finish_year}}{{/if}}
         </p>
