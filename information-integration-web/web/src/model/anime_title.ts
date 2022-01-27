@@ -1,4 +1,4 @@
-interface AnimeTitle {
+export interface AnimeTitle {
     id: number,
     title: string,
     duration: number,

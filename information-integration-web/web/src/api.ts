@@ -1,3 +1,5 @@
+import { AnimeTitle } from "./model/anime_title";
+
 export class Api {
     base: string;
 

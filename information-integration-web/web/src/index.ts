@@ -8,7 +8,9 @@ import $ from 'jquery';
 import api from './api';
 import bodyRender from './views/index.hbs';
 import animeCard from './views/template/anime_title.hbs';
+
 import { histogram } from './visualization';
+import { AnimeTitle } from './model/anime_title';
 
 class DataProcess {
     data: AnimeTitle[];
