@@ -6,69 +6,45 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.util import ngrams
 import string
-import copy
 
-threshold = 0.55
+threshold = 0.7
 
-
-def check_dup(str1, str2):
-    # check year first episodes first
-    # then check similarity
-    # less time complex
-    # window size 2
-
-    # pre-check number_of_episodes
-
-    '''
-    sy1 = str1["start_year"]
-    fy1 = str1["finish_year"]
-    sy2 = str2["start_year"]
-    fy2 = str2["finish_year"]
-    '''
-
-    lemmer = nltk.stem.WordNetLemmatizer()  # import WordNet Lemmatizer
+def compute_ngrams(value):
+    # import WordNet Lemmatizer
+    lemmer = nltk.stem.WordNetLemmatizer()
+    # get punctuation symbols as key and None as value in order to remove them using translate later
     remove_punct_dict = dict((ord(punct), None) for punct in
-                             string.punctuation)  # get punctiation symbols as key and None as value in order to remove them using translate later
+                             string.punctuation)  
 
     def LemTokens(tokens):
-        return [lemmer.lemmatize(token, 'v') for token in tokens if
-                token not in set(stopwords.words('english'))]  # lemmatize the token if it is not a stopword
+        # lemmatize the token if it is not a stopword
+        return [lemmer.lemmatize(token, 'v') for token in tokens 
+                    if token not in set(stopwords.words('english'))]
 
     def LemNormalize(text):
-        return LemTokens(nltk.word_tokenize(text.lower().translate(
-            remove_punct_dict)))  # Remove punctuation, convert to lowercase then tokenize. Return unique values only
+        # Remove punctuation, convert to lowercase then tokenize. Return unique values only
+        return LemTokens(nltk.word_tokenize(text.lower().translate(remove_punct_dict)))
 
-    str1Token = LemNormalize(str1)
-    str2Token = LemNormalize(str2)
-    # print(str1Token)
-    str1Token = ' '.join(str1Token)
-    str2Token = ' '.join(str2Token)
+    tokens = LemNormalize(value)
+    joined = ' '.join(tokens)
+    return [''.join(list(kgram)) for kgram in ngrams(list(joined), 3)]
 
-    def splitch(row):
-        t = []
-        for token in row:
-            token = list(token)
-            t += token
 
-        row = copy.deepcopy(t)
-        return row
+def set_similarity(listA, listB):
+    joint = set(listA).intersection(set(listB))  # get the joint
+    union = set(listA).union(set(listB))
+    if len(union) == 0:
+        sim = 0
+    else:
+        sim = len(joint) / len(union)
+    return sim
 
-    str1Token = splitch(str1Token)
-    str2Token = splitch(str2Token)
 
-    str1ngrams = [u''.join(w) for w in ngrams(str1Token, 3)]
-    str2ngrams = [u''.join(w) for w in ngrams(str2Token, 3)]
+def check_dup(left, right):
+    left_ngrams = compute_ngrams(left)
+    right_ngrams = compute_ngrams(right)
 
-    def similarity(listA, listB):
-        joint = set(listA).intersection(set(listB))  # get the joint
-        union = set(listA).union(set(listB))
-        if len(union) == 0:
-            sim = 0
-        else:
-            sim = len(joint) / len(union)
-        return sim
-
-    return similarity(str1ngrams, str2ngrams)
+    return set_similarity(left_ngrams, right_ngrams)
 
 
 def merge(row_a, row_b):
@@ -115,7 +91,7 @@ def merge(row_a, row_b):
 
 
 def weighted_score(result1, result2):
-    score = 0
+    score = check_dup(result1['title'], result2['title'])
     # score+=(1 if(result1['duration_in_minutes']==result2['duration_in_minutes']) else -3)*(0.05 if((not result1['duration_in_minutes']== None) and (not ['duration_in_minutes']==None)) else 0)
     score += (1 if (result1['number_of_episodes'] == result2['number_of_episodes']) else -3) * (
         0.05 if (not result1['number_of_episodes'] is not None and not ['number_of_episodes'] is None) else 0)
@@ -176,6 +152,7 @@ def run_data_fusion():
                   weighted_score(current_row, anime_titles.iloc[j]))
             current_row = merge(current_row, anime_titles.iloc[j])
             j += 1
+        # result = pd.concat([result, current_row])
         result = result.append(current_row)
         i = j
 
@@ -185,4 +162,11 @@ def run_data_fusion():
 
 
 if __name__ == '__main__':
+
+    # download nltk modules
+    nltk.download("punkt")
+    nltk.download("stopwords")
+    nltk.download("wordnet")
+    nltk.download("omw-1.4")
+
     run_data_fusion()
