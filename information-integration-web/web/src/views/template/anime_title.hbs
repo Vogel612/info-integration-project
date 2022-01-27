@@ -1,16 +1,21 @@
 <div class="card">
     <div class="card-body">
-        <input type="hidden" name="id" value="{{ ./id }}"/>
-        <h5 class="card-title">{{ ./title }}</h5>
+        <input type="hidden" name="id" value="{{ id }}"/>
+        <div class="progress">
+            <div class="progress-bar bg-info" role="progressbar" style="width: calc(10% * {{ score }})" aria-valuenow="{{score}}" aria-valuemax="10" aria-valuemin="0">{{score}}/10
+        </div>
+        </div>
+        <h5 class="card-title">{{ title }}<span class="text-muted"> {{ media_type }}</span></h5>
         <ul class="list-group list-group-horizontal">
-            {{#each ./genres}}
+            {{#each genres}}
                 <li class="list-group-item badge rounded-pill">
                     {{.}}
                 </li>
             {{/each}}
         </ul>
         <p>
-            {{./start_year}}{{#if ./finish_year}}-{{./finish_year}}{{/if}}
+            {{#if number_of_episodes}}{{ number_of_episodes }} Episodes, {{/if}}{{duration}} Minutes<br>
+            {{start_year}}{{#if finish_year}}-{{finish_year}}{{/if}}
         </p>
     </div>
 </div>
