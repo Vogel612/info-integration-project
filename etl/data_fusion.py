@@ -1,5 +1,10 @@
 #!/bin/env python3
+
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 import pandas as pd
+pd.options.mode.chained_assignment = None
+
 from sqlalchemy import create_engine
 
 import nltk
