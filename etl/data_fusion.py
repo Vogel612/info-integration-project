@@ -7,7 +7,7 @@ from nltk.corpus import stopwords
 from nltk.util import ngrams
 import string
 
-threshold = 0.2
+threshold = 0.5
 
 def compute_ngrams(value):
     # import WordNet Lemmatizer
@@ -106,7 +106,7 @@ def hash(anime_title):
         media_type = ''
     # return "".join(list(
     #     map(lambda word: word[0].lower(), filter(lambda x: len(x) > 0, anime_title['title'].split(' '))))) + media_type
-    return anime_title['title'] + media_type
+    # return anime_title['title'] + media_type
 
 
 def merge_dependent(table, engine, anime_titles_merged):
@@ -133,8 +133,7 @@ def run_data_fusion():
     anime_titles = pd.read_sql_query('select * from result.anime_titles', engine)
     anime_titles['hash'] = anime_titles.apply(lambda row: hash(row), axis=1)
     anime_titles['duplicates'] = anime_titles.apply(lambda row: [row['id']], axis=1)
-
-    anime_titles.sort_values(by='hash')
+    anime_titles = anime_titles.sort_values(by='hash')
 
     i = 0
     while i < len(anime_titles):
