@@ -17,12 +17,15 @@ class DataProcess {
 
     visContainer: HTMLElement;
     dataContainer: JQuery<HTMLElement>;
+
+    dataTransform: (data: AnimeTitle[]) => [any, number][];
     chart;
 
     constructor(dataEl: JQuery<HTMLElement>, visEl: JQuery<HTMLElement>) {
         this.dataContainer = dataEl;
         this.visContainer = visEl.get()[0];
 
+        this.dataTransform = DataProcess.byYear;
         this.chart = echarts.init(this.visContainer);
         this.resize();
     }
@@ -34,6 +37,11 @@ class DataProcess {
             this.render(),
             this.renderVis(),
         ]);
+    }
+
+    public async visualize(this: DataProcess, transform: (data: AnimeTitle[]) => [any, number][]): Promise<void> {
+        this.dataTransform = transform;
+        return this.renderVis();
     }
 
     public resize(this: DataProcess): void {
@@ -56,13 +64,7 @@ class DataProcess {
             return;
         }
 
-        // assume homogeneous data list
-        const visualizationTarget = histogram<AnimeTitle, number>((t) => t.start_year)(this.data);
-        const dataset = [];
-        for (const [k, v] of Object.entries(visualizationTarget)) {
-            dataset.push([k, v]);
-        }
-
+        const dataset = this.dataTransform(this.data);
         let chartOptions = {
             dataset: [
                 {
@@ -85,6 +87,32 @@ class DataProcess {
 
         // @ts-ignore
         this.chart.setOption(chartOptions);
+    }
+
+    public static byYear(data: AnimeTitle[]): [number, number][] {
+        // assume homogeneous data list
+        const visualizationTarget = histogram<AnimeTitle, number>((t) => t.start_year)(data);
+
+        const dataset = [];
+        for (const [k, v] of Object.entries(visualizationTarget)) {
+            dataset.push([k as unknown as number, v as unknown as number]);
+        }
+        // @ts-ignore
+        return dataset;
+    }
+
+    public static byScore(data: AnimeTitle[]): [number, number][] {
+        const visTarget = histogram<AnimeTitle, number>((t) => { return Math.ceil(t.score); })(data);
+        return DataProcess.flattenObject(visTarget);
+    }
+
+    private static flattenObject(obj: {}): [number, number][] {
+        const dataset = [];
+        for (const [k, v] of Object.entries(obj)) {
+            dataset.push([k as unknown as number, v as unknown as number]);
+        }
+        // @ts-ignore
+        return dataset;
     }
 }
 
@@ -111,8 +139,16 @@ function render() {
             api[key].apply(api, args).then(d => dataHolder.update(d));
         }
     }
+    interact['visualize'] = (vSpec: (data: AnimeTitle[]) => [any, number][]) => {
+        dataHolder.visualize(vSpec);
+    }
+    const visualizations: any = {};
+    visualizations['byYear'] = DataProcess.byYear;
+    visualizations['score'] = DataProcess.byScore;
     // @ts-ignore
     window['interact'] = interact;
+    // @ts-ignore
+    window['visualizations'] = visualizations;
 }
 
 $(render)
