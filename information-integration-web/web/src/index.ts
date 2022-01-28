@@ -88,17 +88,11 @@ class DataProcess {
         // @ts-ignore
         this.chart.setOption(chartOptions);
     }
-
+    
     public static byYear(data: AnimeTitle[]): [number, number][] {
         // assume homogeneous data list
         const visualizationTarget = histogram<AnimeTitle, number>((t) => t.start_year)(data);
-
-        const dataset = [];
-        for (const [k, v] of Object.entries(visualizationTarget)) {
-            dataset.push([k as unknown as number, v as unknown as number]);
-        }
-        // @ts-ignore
-        return dataset;
+        return DataProcess.flattenObject(visualizationTarget);
     }
 
     public static byScore(data: AnimeTitle[]): [number, number][] {
@@ -106,12 +100,11 @@ class DataProcess {
         return DataProcess.flattenObject(visTarget);
     }
 
-    private static flattenObject(obj: {}): [number, number][] {
-        const dataset = [];
+    private static flattenObject(obj: {}): [any, number][] {
+        const dataset: [any, number][]  = [];
         for (const [k, v] of Object.entries(obj)) {
-            dataset.push([k as unknown as number, v as unknown as number]);
+            dataset.push([k as any, v as unknown as number]);
         }
-        // @ts-ignore
         return dataset;
     }
 }
@@ -132,6 +125,24 @@ function render() {
     $('.collapse', content).each((_, el) => { let c = new bs.Collapse(el); });
     $('.collapse', content).on('shown.bs.collapse', () => dataHolder.resize());
 
+    const visualizations: any = {};
+    visualizations['byYear'] = DataProcess.byYear;
+    visualizations['score'] = DataProcess.byScore;
+
+    const namedVisualizations = [
+        { name: "Score", title: "By Score", fn: DataProcess.byScore },
+        { name: "Year", title: "By Year", fn: DataProcess.byYear },
+    ];
+
+    const visualizationNav = $('#vis-nav');
+    for (const visNavItem of namedVisualizations) {
+        const navItem = $(`<li class="nav-item"><a class="nav-link" href="#">${visNavItem.title}</a>`);
+        navItem.on('click', () => {
+            dataHolder.visualize(visNavItem.fn);
+        });
+        visualizationNav.append(navItem);
+    }
+
     const interact: any = {};
     for (const key in api) {
         interact[key] = (...args: any) => {
@@ -142,9 +153,6 @@ function render() {
     interact['visualize'] = (vSpec: (data: AnimeTitle[]) => [any, number][]) => {
         dataHolder.visualize(vSpec);
     }
-    const visualizations: any = {};
-    visualizations['byYear'] = DataProcess.byYear;
-    visualizations['score'] = DataProcess.byScore;
     // @ts-ignore
     window['interact'] = interact;
     // @ts-ignore
