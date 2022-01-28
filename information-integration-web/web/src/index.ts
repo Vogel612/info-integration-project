@@ -116,8 +116,6 @@ function render() {
 
 
     let dataHolder = new DataProcess($('#results', content), $('#vis-canvas', content));
-    // default to a titles-between query for 1990 and 1995 to have a small-ish dataset for the initial load
-    api.titlesBetween(1990, 1995).then(d => dataHolder.update(d));
 
     $(window).on('resize', () => {
         dataHolder.resize();
@@ -141,6 +139,10 @@ function render() {
         });
         visualizationNav.append(navItem);
     }
+    visualizationNav.children().first().trigger("click");
+
+    // default to a titles-between query for 1990 and 1995 to have a small-ish dataset for the initial load
+    api.titlesBetween(1990, 1995).then(d => dataHolder.update(d));
 
     const interact: any = {};
     for (const key in api) {
