@@ -116,7 +116,7 @@ function render() {
 
 
     let dataHolder = new DataProcess($('#results', content), $('#vis-canvas', content));
-    // api.allTitles().then(d => dataHolder.update(d));
+    // default to a titles-between query for 1990 and 1995 to have a small-ish dataset for the initial load
     api.titlesBetween(1990, 1995).then(d => dataHolder.update(d));
 
     $(window).on('resize', () => {
@@ -125,9 +125,6 @@ function render() {
     $('.collapse', content).each((_, el) => { let c = new bs.Collapse(el); });
     $('.collapse', content).on('shown.bs.collapse', () => dataHolder.resize());
 
-    const visualizations: any = {};
-    visualizations['byYear'] = DataProcess.byYear;
-    visualizations['score'] = DataProcess.byScore;
 
     const namedVisualizations = [
         { name: "Score", title: "By Score", fn: DataProcess.byScore },
@@ -136,9 +133,11 @@ function render() {
 
     const visualizationNav = $('#vis-nav');
     for (const visNavItem of namedVisualizations) {
-        const navItem = $(`<li class="nav-item"><a class="nav-link" href="#">${visNavItem.title}</a>`);
-        navItem.on('click', () => {
-            dataHolder.visualize(visNavItem.fn);
+        const navItem = $(`<li class="nav-item"><a class="nav-link" href="#">${visNavItem.title}</a></li>`);
+        navItem.on('click', async (evt) => {
+            $(evt.currentTarget).siblings(".active").removeClass("active");
+            $(evt.currentTarget).addClass("active");
+            await dataHolder.visualize(visNavItem.fn);
         });
         visualizationNav.append(navItem);
     }
@@ -150,13 +149,8 @@ function render() {
             api[key].apply(api, args).then(d => dataHolder.update(d));
         }
     }
-    interact['visualize'] = (vSpec: (data: AnimeTitle[]) => [any, number][]) => {
-        dataHolder.visualize(vSpec);
-    }
     // @ts-ignore
     window['interact'] = interact;
-    // @ts-ignore
-    window['visualizations'] = visualizations;
 }
 
 $(render)
