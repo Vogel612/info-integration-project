@@ -15,29 +15,20 @@ import java.util.stream.Collectors;
 @Repository
 public class PostgresAnimeRepository implements AnimeRepository {
     private static final RowMapper<AnimeTitle> ANIME_TITLE_ROW_MAPPER = new AnimeRowMapper();
-    private static final String TITLES_SQL = """
-            select * from result.anime_titles at
-                left join (select anime_title_id, array_agg(warning) as warning
-                    from result.anime_titles_content_warnings atcw
-                    left join result.content_warnings cw on atcw.content_warning_id = cw.id
-                    group by anime_title_id
-                ) cw on at.id = cw.anime_title_id
-                left join (select anime_title_id, array_agg(genre) as genre
-                    from result.anime_titles_genres atg
-                    left join result.genres g on atg.genre_id = g.id
-                    group by anime_title_id
-                ) g on at.id = g.anime_title_id
-                left join (select anime_title_id, array_agg(producer) as producer
-                    from result.anime_titles_producers atp
-                    left join result.producers p on atp.producer_id = p.id
-                    group by anime_title_id
-                ) p on at.id = p.anime_title_id
-                left join (select anime_title_id, array_agg(studio) as studio
-                    from result.anime_titles_studios ats
-                    left join result.studios s on ats.studio_id = s.id
-                    group by anime_title_id
-                ) s on at.id = s.anime_title_id""";
-
+    private static final String TITLES_SQL = "select * from public.anime_titles_merged at " +
+            "left join (select atcw.id, array_agg(warning) as warning from public.anime_titles_content_warnings_merged atcw " +
+            "left join public.content_warnings cw on atcw.content_warning_id = cw.id " +
+            "group by atcw.id) cw on at.id = cw.id " +
+            "left join (select atg.id, array_agg(genre) as genre from public.anime_titles_genres_merged atg " +
+            "left join public.genres g on atg.genre_id = g.id " +
+            "group by atg.id) g on at.id = g.id " +
+            "left join (select atp.id, array_agg(producer) as producer from public.anime_titles_producers_merged atp " +
+            "left join public.producers p on atp.producer_id = p.id " +
+            "group by atp.id) p on at.id = p.id " +
+            "left join (select ats.id, array_agg(studio) as studio from public.anime_titles_studios_merged ats " +
+            "left join public.studios s on ats.studio_id = s.id " +
+            "group by ats.id) s on at.id = s.id";
+    
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -53,7 +44,7 @@ public class PostgresAnimeRepository implements AnimeRepository {
 
     @Override
     public String getTitleSynopsis(int titleId) {
-        return jdbcTemplate.queryForObject("SELECT synopsis FROM result.anime_titles WHERE id = ?", String.class, titleId);
+        return jdbcTemplate.queryForObject("SELECT synopsis FROM public.anime_titles_merged WHERE id = ?", String.class, titleId);
     }
 
     @Override
