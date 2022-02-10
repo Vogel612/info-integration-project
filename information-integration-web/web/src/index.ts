@@ -17,12 +17,15 @@ class DataProcess {
 
     visContainer: HTMLElement;
     dataContainer: JQuery<HTMLElement>;
+
+    dataTransform: (data: AnimeTitle[]) => [any, number][];
     chart;
 
     constructor(dataEl: JQuery<HTMLElement>, visEl: JQuery<HTMLElement>) {
         this.dataContainer = dataEl;
         this.visContainer = visEl.get()[0];
 
+        this.dataTransform = DataProcess.byYear;
         this.chart = echarts.init(this.visContainer);
         this.resize();
     }
@@ -34,6 +37,11 @@ class DataProcess {
             this.render(),
             this.renderVis(),
         ]);
+    }
+
+    public async visualize(this: DataProcess, transform: (data: AnimeTitle[]) => [any, number][]): Promise<void> {
+        this.dataTransform = transform;
+        return this.renderVis();
     }
 
     public resize(this: DataProcess): void {
@@ -56,13 +64,7 @@ class DataProcess {
             return;
         }
 
-        // assume homogeneous data list
-        const visualizationTarget = histogram<AnimeTitle, number>((t) => t.start_year)(this.data);
-        const dataset = [];
-        for (const [k, v] of Object.entries(visualizationTarget)) {
-            dataset.push([k, v]);
-        }
-
+        const dataset = this.dataTransform(this.data);
         let chartOptions = {
             dataset: [
                 {
@@ -86,6 +88,25 @@ class DataProcess {
         // @ts-ignore
         this.chart.setOption(chartOptions);
     }
+    
+    public static byYear(data: AnimeTitle[]): [number, number][] {
+        // assume homogeneous data list
+        const visualizationTarget = histogram<AnimeTitle, number>((t) => t.start_year)(data);
+        return DataProcess.flattenObject(visualizationTarget);
+    }
+
+    public static byScore(data: AnimeTitle[]): [number, number][] {
+        const visTarget = histogram<AnimeTitle, number>((t) => { return Math.ceil(t.score); })(data);
+        return DataProcess.flattenObject(visTarget);
+    }
+
+    private static flattenObject(obj: {}): [any, number][] {
+        const dataset: [any, number][]  = [];
+        for (const [k, v] of Object.entries(obj)) {
+            dataset.push([k as any, v as unknown as number]);
+        }
+        return dataset;
+    }
 }
 
 function render() {
@@ -95,14 +116,43 @@ function render() {
 
 
     let dataHolder = new DataProcess($('#results', content), $('#vis-canvas', content));
-    // api.allTitles().then(d => dataHolder.update(d));
-    api.titlesBetween(1990, 1995).then(d => dataHolder.update(d));
 
     $(window).on('resize', () => {
         dataHolder.resize();
     });
     $('.collapse', content).each((_, el) => { let c = new bs.Collapse(el); });
     $('.collapse', content).on('shown.bs.collapse', () => dataHolder.resize());
+
+
+    const namedVisualizations = [
+        { name: "Score", title: "By Score", fn: DataProcess.byScore },
+        { name: "Year", title: "By Year", fn: DataProcess.byYear },
+    ];
+
+    const visualizationNav = $('#vis-nav');
+    for (const visNavItem of namedVisualizations) {
+        const navItem = $(`<li class="nav-item"><a class="nav-link" href="#">${visNavItem.title}</a></li>`);
+        navItem.on('click', async (evt) => {
+            $(evt.currentTarget).siblings(".active").removeClass("active");
+            $(evt.currentTarget).addClass("active");
+            await dataHolder.visualize(visNavItem.fn);
+        });
+        visualizationNav.append(navItem);
+    }
+    visualizationNav.children().first().trigger("click");
+
+    // default to a titles-between query for 1990 and 1995 to have a small-ish dataset for the initial load
+    api.titlesBetween(1990, 1995).then(d => dataHolder.update(d));
+
+    const interact: any = {};
+    for (const key in api) {
+        interact[key] = (...args: any) => {
+            // @ts-ignore
+            api[key].apply(api, args).then(d => dataHolder.update(d));
+        }
+    }
+    // @ts-ignore
+    window['interact'] = interact;
 }
 
 $(render)

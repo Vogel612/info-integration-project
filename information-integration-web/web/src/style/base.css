@@ -1,6 +1,17 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap/dist/css/bootstrap-grid.min.css';
 @import 'bootstrap/dist/css/bootstrap-utilities.min.css';
-/*@import 'bootstrap/dist/css/bootstrap-reboot.min.css';*/
+@import 'bootstrap/dist/css/bootstrap-reboot.min.css';
 
 @import 'bootstrap-icons/font/bootstrap-icons.css';
+
+.nav-pills .nav-link {
+    border-style: solid;
+    border-color: black;
+    border-width: 2px;
+    color: black;
+}
+
+.nav-pills .nav-item.active .nav-link {
+    background-color: lightblue;
+}
