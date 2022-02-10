@@ -28,7 +28,7 @@ public class PostgresAnimeRepository implements AnimeRepository {
             "left join (select ats.id, array_agg(studio) as studio from public.anime_titles_studios_merged ats " +
             "left join public.studios s on ats.studio_id = s.id " +
             "group by ats.id) s on at.id = s.id";
-
+    
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

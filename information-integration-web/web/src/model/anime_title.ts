@@ -1,0 +1,16 @@
+export interface AnimeTitle {
+    id: number,
+    title: string,
+    duration: number,
+    number_of_episodes: number,
+    media_type: string,
+    score: number,
+    source: string,
+    start_year: number,
+    finish_year: number,
+    season_of_release: string,
+    content_warnings: string[],
+    genres: string[],
+    producers: string[],
+    studios: string[],
+}

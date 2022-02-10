@@ -31,7 +31,7 @@ fi
 if [[ $# = 4 ]]
 then
     echo "Waiting for the docker container to finish starting..."
-    sleep 10s
+    sleep 20s
     echo "Creating database integrated_system and defining schemata 'sources' and 'result'"
     PGPASSWORD=$password psql -h 127.0.0.1 -U postgres -c "CREATE DATABASE integrated_system OWNER 'postgres' LOCALE 'en_US.utf8';"
     PGPASSWORD=$password psql -h 127.0.0.1 -U postgres integrated_system < define_sources.sql;

@@ -1,0 +1,37 @@
+{
+  "name": "information-integration-frontend",
+  "version": "0.0.1",
+  "description": "The Client Frontend for the information integration lecture project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode=production --node-env=production",
+    "build:dev": "webpack --mode=development",
+    "build:prod": "webpack --mode=production --node-env=production",
+    "watch": "webpack --watch"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/bootstrap": "^5.1.9",
+    "@types/echarts": "^4.9.13",
+    "@webpack-cli/generators": "^2.4.2",
+    "css-loader": "^6.5.1",
+    "handlebars-loader": "^1.7.1",
+    "html-webpack-plugin": "^5.5.0",
+    "mini-css-extract-plugin": "^2.5.3",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.2.6",
+    "tsc": "^2.0.4",
+    "typescript": "^4.5.5",
+    "webpack": "^5.67.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "bootstrap": "^5.1.3",
+    "bootstrap-icons": "^1.7.2",
+    "echarts": "^5.3.0",
+    "handlebars": "^4.7.7",
+    "jquery": "^3.6.0"
+  }
+}
