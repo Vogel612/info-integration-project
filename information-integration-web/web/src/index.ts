@@ -59,7 +59,7 @@ class DataProcess {
     }
 
     private async renderVis(this: DataProcess): Promise<void> {
-        if (!this.data.length) {
+        if (!(this.data || this.data.length)) {
             // FIXME clear chart
             return;
         }
