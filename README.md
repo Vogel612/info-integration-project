@@ -1,5 +1,9 @@
 # info-integration-project
 
+***Archival Note:*** This project was part of student work.
+As such with it being handed in, it has finished its useful lifecycle.
+This is not supposed to be used in basically any context, but left standing in case it's useful on the resumee of any of the students involved.
+
 ## Initial application setup
 
 The Setup needs docker, python 3.7 or later and a correctly configured JAVA_HOME (for gradle).
